@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:haf/counter.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,7 +12,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.blueGrey,
+        ),
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(),
     );
@@ -76,12 +78,36 @@ class _MyHomePageState extends State<MyHomePage> {
     'https://cdn.shopify.com/s/files/1/0287/1256/6887/products/Bilz2.jpg?v=1613624983',
   ];
 
+  late int _expandedIndex;
   late List<bool> _isCheckedList;
+  late List<int> _itemQuantities;
 
   @override
   void initState() {
     super.initState();
+    _expandedIndex = -1;
     _isCheckedList = List.generate(_titles.length, (index) => false);
+    _itemQuantities = List.generate(_titles.length, (index) => 0);
+  }
+
+  void _toggleExpanded(int index) {
+    setState(() {
+      if (_expandedIndex == index) {
+        _expandedIndex = -1;
+      } else {
+        _expandedIndex = index;
+      }
+    });
+  }
+
+  double _calculateTotalValue() {
+    double totalValue = 0;
+    for (int i = 0; i < _isCheckedList.length; i++) {
+      if (_isCheckedList[i]) {
+        totalValue += _prices[i] * (_itemQuantities[i] > 0 ? _itemQuantities[i] : 1);
+      }
+    }
+    return totalValue;
   }
 
   @override
@@ -90,61 +116,134 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text('Happines & Food alpha'),
       ),
-      body: GridView.count(
-        crossAxisCount: 2,
-        childAspectRatio: 0.75,
-        children: List.generate(_titles.length, (index) {
-          return Container(
+      body: ListView.builder(
+        itemCount: _titles.length,
+        itemBuilder: (context, index) {
+          return Card(
             margin: EdgeInsets.all(10),
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: Colors.white,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Image.network(
-                    _imageUrls[index],
-                    //width: 200,
-                    //height: 100,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  _titles[index],
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '\$${_prices[index]}',
-                      style: TextStyle(fontSize: 16),
+            child: InkWell(
+              onTap: () {
+                _toggleExpanded(index);
+              },
+              child: Column(
+                children: [
+                  ListTile(
+                    title: Text(
+                      _titles[index],
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    Checkbox(
-                      value: _isCheckedList[index],
-                      onChanged: (value) {
-                        setState(() {
-                          _isCheckedList[index] = value!;
-                        });
-                      },
+                    trailing: Icon(
+                      _expandedIndex == index
+                          ? Icons.expand_less
+                          : Icons.expand_more,
                     ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                Counter(),
-              ],
+                  ),
+                  if (_expandedIndex == index)
+                    Column(
+                      children: [
+                        Image.network(
+                          _imageUrls[index],
+                          fit: BoxFit.contain,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '\$${_prices[index]}',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              Checkbox(
+                                value: _isCheckedList[index],
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    _isCheckedList[index] = value ?? false;
+                                    if (!value!) {
+                                      _itemQuantities[index] = 0;
+                                    }
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        Counter(
+                          count: _isCheckedList[index] ? 1 : 0,
+                          onChanged: (int count) {
+                            setState(() {
+                              _itemQuantities[index] = count;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                ],
+              ),
             ),
           );
-        }),
+        },
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Precio total: \$${_calculateTotalValue().toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  // Lógica de compra
+                },
+                child: Text('Comprar'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
+
+class Counter extends StatelessWidget {
+  final int count;
+  final ValueChanged<int> onChanged;
+
+  const Counter({
+    Key? key,
+    required this.count,
+    required this.onChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        IconButton(
+          onPressed: () {
+            onChanged(count - 1);
+          },
+          icon: Icon(Icons.remove),
+        ),
+        Text(count.toString()),
+        IconButton(
+          onPressed: () {
+            onChanged(count + 1);
+          },
+          icon: Icon(Icons.add),
+        ),
+      ],
+    );
+  }
+}
+
+
