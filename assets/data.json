@@ -1,0 +1,78 @@
+{
+  "usuario": {
+    "nombre": "Usuario Ejemplo",
+    "fotoPerfil": "https://www.shutterstock.com/image-vector/default-avatar-profile-vector-user-260nw-1705357234.jpg",
+    "correo": "Usuario@Ejemplo.com"
+  },
+  "categorias": [
+    {
+      "title": "Categoría 1",
+      "image": "https://cugat.cl/multi/rengo/wp-content/uploads/sites/5/2022/07/7802000014703-2.jpg"
+    },
+    {
+      "title": "Categoría 2",
+      "image": "https://cugat.cl/multi/rengo/wp-content/uploads/sites/5/2022/07/7802000014703-2.jpg"
+    },
+    {
+      "title": "Categoría 3",
+      "image": "https://cugat.cl/multi/rengo/wp-content/uploads/sites/5/2022/07/7802000014703-2.jpg"
+    },
+    {
+      "title": "Categoría 4",
+      "image": "https://cugat.cl/multi/rengo/wp-content/uploads/sites/5/2022/07/7802000014703-2.jpg"
+    },
+    {
+      "title": "Categoría 5",
+      "image": "https://cugat.cl/multi/rengo/wp-content/uploads/sites/5/2022/07/7802000014703-2.jpg"
+    }
+  ],
+  "preferencias": [
+    {
+      "title": "Preferencia 1",
+      "image": "https://www.eltiempo.com/files/article_main_1200/uploads/2023/03/10/640b87581a67c.jpeg"
+    },
+    {
+      "title": "Preferencia 2",
+      "image": "https://cdn.sanity.io/images/jsdrzfkj/production-esmx/5e2316cc629ede9cd6646163efeafc5486161751-6240x4160.jpg?w=800&h=533&fit=crop"
+    },
+    {
+      "title": "Preferencia 3",
+      "image": "https://assets.unileversolutions.com/recipes-v2/239857.jpg"
+    },
+    {
+      "title": "Preferencia 4",
+      "image": "https://statics.forbesargentina.com/2020/05/crop/5ed0234a9b465__822x460.webp"
+    },
+    {
+      "title": "Preferencia 5",
+      "image": "https://comidaschilenas.com/wp-content/uploads/2019/08/Receta-de-chaparritas-chilenas.jpg"
+    }
+  ],
+  "items": [
+    {
+      "name": "Item 1",
+      "price": "10000"
+    },
+    {
+      "name": "Item 2",
+      "price": "25000"
+    },
+    {
+      "name": "Item 3",
+      "price": "5000"
+    },
+    {
+      "name": "Item 4",
+      "price": "15000"
+    },
+    {
+      "name": "Item 5",
+      "price": "20000"
+    }
+  ]
+}
+
+
+
+
+  
