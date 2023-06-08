@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'profile_page.dart';
 import 'settings_page.dart';
 import 'home_page.dart';
+import 'purchases_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -24,6 +25,8 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => ProfilePage());
           case '/settings':
             return MaterialPageRoute(builder: (_) => SettingsPage());
+          case '/purchases':
+            return MaterialPageRoute(builder: (_) => PurchasesPage());
           default:
             return MaterialPageRoute(builder: (_) => ErrorPage());
         }

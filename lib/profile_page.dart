@@ -8,14 +8,25 @@ class ProfilePage extends StatelessWidget {
         title: Text('Perfil'),
       ),
       body: Center(
-        child: ElevatedButton(
-          child: Text('Volver al inicio'),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              child: Text('Ver últimas compras'),
+              onPressed: () {
+                Navigator.pushNamed(context, '/purchases');
+              },
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              child: Text('Volver al inicio'),
+              onPressed: () {
+                Navigator.popUntil(context, ModalRoute.withName('/'));
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
