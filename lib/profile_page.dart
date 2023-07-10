@@ -14,7 +14,7 @@ class ProfilePage extends StatelessWidget {
             ElevatedButton(
               child: Text('Ver últimas compras'),
               onPressed: () {
-                Navigator.pushNamed(context, '/purchases');
+                Navigator.pushNamed(context, '/purchases_history');
               },
             ),
             SizedBox(height: 16),

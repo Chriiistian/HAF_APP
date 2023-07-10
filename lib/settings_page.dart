@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'profile_page.dart';
-import 'purchases_page.dart';
+import 'purchases_history_page.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -39,7 +39,7 @@ class _SettingsPageState extends State<SettingsPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PurchasesPage(),
+          builder: (context) => PurchasesHistoryPage(),
         ),
       );
     } else {

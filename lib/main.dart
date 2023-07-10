@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'profile_page.dart';
 import 'settings_page.dart';
 import 'home_page.dart';
 import 'purchases_page.dart';
+import 'purchases_history_page.dart';
+import 'login_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,27 +20,46 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  // Verificar el estado de la sesión
+  Future<bool> checkSession() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    return isLoggedIn;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Mi App',
-      theme: ThemeData(
-        primarySwatch: Colors.orange,
-      ),
-      initialRoute: '/',
-      onGenerateRoute: (settings) {
-        switch (settings.name) {
-          case '/':
-            return MaterialPageRoute(builder: (_) => HomePage());
-          case '/profile':
-            return MaterialPageRoute(builder: (_) => ProfilePage());
-          case '/settings':
-            return MaterialPageRoute(builder: (_) => SettingsPage());
-          case '/purchases':
-            return MaterialPageRoute(builder: (_) => PurchasesPage());
-          default:
-            return MaterialPageRoute(builder: (_) => ErrorPage());
+    return FutureBuilder<bool>(
+      future: checkSession(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          bool isLoggedIn = snapshot.data!;
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Mi App',
+            theme: ThemeData(
+              primarySwatch: Colors.orange,
+            ),
+            home: isLoggedIn ? HomePage() : LoginPage(),
+            onGenerateRoute: (settings) {
+              switch (settings.name) {
+                case '/profile':
+                  return MaterialPageRoute(builder: (_) => ProfilePage());
+                case '/settings':
+                  return MaterialPageRoute(builder: (_) => SettingsPage());
+                case '/purchases':
+                  return MaterialPageRoute(builder: (_) => PurchasesPage());
+                case '/purchases_history':
+                  return MaterialPageRoute(builder: (_) => PurchasesHistoryPage());
+                case '/home_page':
+                  return MaterialPageRoute(builder: (_) => HomePage());
+                default:
+                  return MaterialPageRoute(builder: (_) => ErrorPage());
+              }
+            },
+          );
+        } else {
+          return CircularProgressIndicator();
         }
       },
     );
