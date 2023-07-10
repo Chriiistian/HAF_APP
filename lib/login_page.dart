@@ -84,16 +84,23 @@ class _LoginPageState extends State<LoginPage> {
     // Verifica el código de respuesta de la API
     if (response.statusCode == 200) {
       // El inicio de sesión fue exitoso
-      // Puedes procesar la respuesta de la API según tus necesidades
-      // Por ejemplo, guardar el estado de la sesión en el almacenamiento local
+      Map<String, dynamic> responseData = json.decode(response.body);
+      Map<String, dynamic> userData = responseData['user'];
+
+      // Accede a los datos del usuario y utilízalos según tus necesidades
+      int userId = userData['id'];
+      String userName = userData['name'];
+
+      // Guarda los datos del usuario en el almacenamiento local
       SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('userId', userId);
+      await prefs.setString('userName', userName);
       await prefs.setBool('isLoggedIn', true);
 
       // Navega a la siguiente página
       Navigator.pushReplacementNamed(context, '/home_page');
     } else {
       // El inicio de sesión falló
-      // Puedes mostrar un mensaje de error al usuario o realizar cualquier otra acción según tus necesidades
       showDialog(
         context: context,
         builder: (BuildContext context) {

@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'profile_page.dart';
 import 'settings_page.dart';
 import 'home_page.dart';
-import 'purchases_page.dart';
+import 'home_admin.dart';
 import 'purchases_history_page.dart';
 import 'login_page.dart';
 
@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
                 case '/settings':
                   return MaterialPageRoute(builder: (_) => SettingsPage());
                 case '/purchases':
-                  return MaterialPageRoute(builder: (_) => PurchasesPage());
+                  return MaterialPageRoute(builder: (_) => HomeAdmin());
                 case '/purchases_history':
                   return MaterialPageRoute(builder: (_) => PurchasesHistoryPage());
                 case '/home_page':

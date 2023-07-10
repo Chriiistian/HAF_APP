@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'settings_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Item {
   final String id;
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> preferencias = [];
   List<Item> items = [];
   List<Item> selectedItems = [];
+  int userId = 0;
 
   @override
   void initState() {
@@ -41,14 +43,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     String jsonData =
         await DefaultAssetBundle.of(context).loadString('assets/data.json');
     final data = json.decode(jsonData);
     setState(() {
-      username = data['usuario']['nombre'];
-      userImageUrl = data['usuario']['fotoPerfil'];
+      username = prefs.getString('userName') ?? data['usuario']['nombre'];
+      userId = prefs.getInt('userId') ?? userId;
+      userImageUrl =
+          prefs.getString('userImageUrl') ?? data['usuario']['fotoPerfil'];
       categorias = List<Map<String, dynamic>>.from(data['categorias']);
       preferencias = List<Map<String, dynamic>>.from(data['preferencias']);
+      
     });
   }
 
@@ -122,40 +128,6 @@ class _HomePageState extends State<HomePage> {
     return totalAmount.toStringAsFixed(2);
   }
 
-  Future<void> comprarItems(List<Item> items) async {
-    // Crear la fecha actual
-    DateTime now = DateTime.now();
-    String fecha = now.toString();
-
-    // Crear la lista de órdenes de compra
-    List<Map<String, dynamic>> ordenesCompra = [];
-
-    for (Item item in items) {
-      Map<String, dynamic> ordenCompra = {
-        'id_user': '01', // Reemplazar con el ID de usuario adecuado
-        'id_item': item.id,
-        'fecha': fecha,
-        'valor': item.price * item.quantity,
-      };
-      ordenesCompra.add(ordenCompra);
-    }
-
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/ordenes'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(ordenesCompra),
-    );
-
-    if (response.statusCode == 200) {
-      // Las órdenes de compra se crearon exitosamente
-      print('Órdenes de compra creadas');
-      selectedItems.clear();
-    } else {
-      // Hubo un error al crear las órdenes de compra
-      print('Error al crear las órdenes de compra');
-    }
-  }
-
   void showPaymentOptions() {
     int selectedOptionId = 0; // ID de la opción seleccionada
 
@@ -213,7 +185,7 @@ class _HomePageState extends State<HomePage> {
         'valor': item.price * item.quantity,
         'id_item': item.id,
         'fecha': fecha.toIso8601String(), // Convert DateTime to string
-        'id_user': '1',
+        'id_user': userId,
       };
 
       ordenesCompra.add(ordenCompra);
@@ -233,6 +205,7 @@ class _HomePageState extends State<HomePage> {
           .clear(); // Limpiar la lista de ítems seleccionados después de la compra
     } else {
       // Hubo un error al crear las órdenes de compra
+      print(ordenesCompra);
       print('Error al crear las órdenes de compra');
     }
   }
