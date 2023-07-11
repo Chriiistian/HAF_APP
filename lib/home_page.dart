@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'settings_page.dart';
+import 'SuccessPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_popup_dialog/flutter_popup_dialog.dart';
+import 'package:flutter_dialogs/flutter_dialogs.dart';
 
 class Item {
   final String id;
@@ -168,23 +169,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void Showsuccesspay() {
-    showPopupDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return PopupDialog(
-          title: Text('Compra exitosa'),
-          content: Text('La compra se realizó exitosamente.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Cerrar el diálogo
-                loadItemsFromAPI(); // Recargar la página
-              },
-              child: Text('Aceptar'),
-            ),
-          ],
-        );
-      },
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SuccessPage(
+          message: 'La compra se realizó exitosamente.',
+          gifUrl: 'URL_DEL_GIF_AQUÍ',
+        ),
+      ),
     );
   }
 

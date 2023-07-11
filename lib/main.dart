@@ -12,35 +12,49 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Configuración de las notificaciones
-  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-  final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+  final InitializationSettings initializationSettings =
+      InitializationSettings(android: initializationSettingsAndroid);
   await FlutterLocalNotificationsPlugin().initialize(initializationSettings);
 
   runApp(MyApp());
 }
+int userType = 0;
 
 class MyApp extends StatelessWidget {
-  // Verificar el estado de la sesión
-  Future<bool> checkSession() async {
+  // Verificar el estado de la sesión y obtener el valor de Typeuser
+  Future<Map<String, dynamic>> checkSession() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-    return isLoggedIn;
+    userType = prefs.getInt('userType') ?? userType;
+    return {'isLoggedIn': isLoggedIn, 'userType': userType};
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
+    return FutureBuilder<Map<String, dynamic>>(
       future: checkSession(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          bool isLoggedIn = snapshot.data!;
+          bool isLoggedIn = snapshot.data!['isLoggedIn'];
+          int userType =
+              snapshot.data!['userType']!; // Asegurar que el valor no sea null
+
+          Widget homeWidget = isLoggedIn ? HomeAdmin() : LoginPage();
+          if (userType == 1) {
+            homeWidget = isLoggedIn ? HomePage() : LoginPage();
+          } else if (userType == 2) {
+            homeWidget = isLoggedIn ? HomeAdmin() : LoginPage();
+          }
+
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Mi App',
             theme: ThemeData(
               primarySwatch: Colors.orange,
             ),
-            home: isLoggedIn ? HomePage() : LoginPage(),
+            home: homeWidget,
             onGenerateRoute: (settings) {
               switch (settings.name) {
                 case '/profile':
@@ -50,7 +64,8 @@ class MyApp extends StatelessWidget {
                 case '/purchases':
                   return MaterialPageRoute(builder: (_) => HomeAdmin());
                 case '/purchases_history':
-                  return MaterialPageRoute(builder: (_) => PurchasesHistoryPage());
+                  return MaterialPageRoute(
+                      builder: (_) => PurchasesHistoryPage());
                 case '/home_page':
                   return MaterialPageRoute(builder: (_) => HomePage());
                 default:

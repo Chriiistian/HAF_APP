@@ -10,45 +10,39 @@ class HomeAdmin extends StatelessWidget {
       appBar: AppBar(
         title: Text('Inicio (Admin)'),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/logo.png', // Ruta de la imagen (ajusta la ruta según la ubicación de tu imagen)
-            width: 200, // Ancho de la imagen
-            height: 200, // Alto de la imagen
-          ),
-          SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => PurchasesHistoryPage()),
-              );
-            },
-            child: Text('Historial de Pedidos'),
-          ),
-          SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => ProductsManagementPage()),
-              );
-            },
-            child: Text('Gestión de Productos'),
-          ),
-        ],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/logo.png',
+              width: 200,
+              height: 200,
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => _navigateToPage(context, PurchasesHistoryPage()),
+              child: Text('Historial de Pedidos'),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => _navigateToPage(context, ProductsManagementPage()),
+              child: Text('Gestión de Productos'),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => SettingsAdminPage()),
-          );
-        },
+        onPressed: () => _navigateToPage(context, SettingsAdminPage()),
         child: Icon(Icons.settings),
       ),
+    );
+  }
+
+  void _navigateToPage(BuildContext context, Widget page) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => page),
     );
   }
 }
