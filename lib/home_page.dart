@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'settings_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_popup_dialog/flutter_popup_dialog.dart';
 
 class Item {
   final String id;
@@ -41,7 +42,7 @@ class _HomePageState extends State<HomePage> {
     loadItemsFromAPI();
   }
 
-int userId = 0;
+  int userId = 0;
 
   Future<void> loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -131,61 +132,61 @@ int userId = 0;
     return totalAmount.toStringAsFixed(2);
   }
 
-Future<void> comprarItems(List<Item> items) async {
-  // Crear la fecha actual
-  DateTime now = DateTime.now();
-  String fecha = now.toString();
+  Future<void> comprarItems(List<Item> items) async {
+    // Crear la fecha actual
+    DateTime now = DateTime.now();
+    String fecha = now.toString();
 
-  // Crear la lista de órdenes de compra
-  List<Map<String, dynamic>> ordenesCompra = [];
+    // Crear la lista de órdenes de compra
+    List<Map<String, dynamic>> ordenesCompra = [];
 
-  for (Item item in items) {
-    Map<String, dynamic> ordenCompra = {
-      'id_user': userId,
-      'id_item': item.id,
-      'fecha': fecha,
-      'valor': item.price * item.quantity,
-    };
-    ordenesCompra.add(ordenCompra);
+    for (Item item in items) {
+      Map<String, dynamic> ordenCompra = {
+        'id_user': userId,
+        'id_item': item.id,
+        'fecha': fecha,
+        'valor': item.price * item.quantity,
+      };
+      ordenesCompra.add(ordenCompra);
+    }
+
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2:8000/ordenes'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(ordenesCompra),
+    );
+
+    if (response.statusCode == 200) {
+      Showsuccesspay();
+      // Las órdenes de compra se crearon exitosamente
+      print('Órdenes de compra creadas');
+      selectedItems.clear();
+    } else {
+      // Hubo un error al crear las órdenes de compra
+      print('Error al crear las órdenes de compra');
+    }
   }
 
-  final response = await http.post(
-    Uri.parse('http://10.0.2.2:8000/ordenes'),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode(ordenesCompra),
-  );
-
-  if (response.statusCode == 200) {
-        // Utilizar un nuevo Navigator para mostrar el AlertDialog
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return WillPopScope(
-              onWillPop: () async => false, // Evitar que se cierre al presionar "Atrás"
-              child: AlertDialog(
-                title: Text('Compra exitosa'),
-                content: Text('La compra se realizó exitosamente.'),
-                actions: [
-                  TextButton(
-                    child: Text('Aceptar'),
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Cerrar el AlertDialog
-                      loadItemsFromAPI(); // Recargar la página
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
+  void Showsuccesspay() {
+    showPopupDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return PopupDialog(
+          title: Text('Compra exitosa'),
+          content: Text('La compra se realizó exitosamente.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Cerrar el diálogo
+                loadItemsFromAPI(); // Recargar la página
+              },
+              child: Text('Aceptar'),
+            ),
+          ],
         );
-      } else {
-        // Hubo un error al crear las órdenes de compra
-        print('Error al crear las órdenes de compra');
-      }
-    // Las órdenes de compra se crearon exitosamente
-    print('Órdenes de compra creadas');
-    selectedItems.clear();
-}
+      },
+    );
+  }
 
   void showPaymentOptions() {
     int selectedOptionId = 0; // ID de la opción seleccionada
@@ -195,12 +196,14 @@ Future<void> comprarItems(List<Item> items) async {
       {
         'id': 1,
         'title': 'Tarjeta de crédito',
-        'image': 'assets/images/tarjeta_credito.png', // Ruta de la imagen para la opción de tarjeta de crédito
+        'image':
+            'assets/images/tarjeta_credito.png', // Ruta de la imagen para la opción de tarjeta de crédito
       },
       {
         'id': 2,
         'title': 'PayPal',
-        'image': 'assets/images/paypal.png', // Ruta de la imagen para la opción de PayPal
+        'image':
+            'assets/images/paypal.png', // Ruta de la imagen para la opción de PayPal
       },
     ];
 
@@ -242,7 +245,8 @@ Future<void> comprarItems(List<Item> items) async {
           actions: [
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop(); // Cerrar el diálogo
+                Navigator.of(context, rootNavigator: true)
+                    .pop(); // Cerrar el diálogo
                 createOrder();
               },
               child: Text("Realizar compra"),
