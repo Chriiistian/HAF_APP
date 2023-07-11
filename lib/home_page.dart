@@ -33,7 +33,6 @@ class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> preferencias = [];
   List<Item> items = [];
   List<Item> selectedItems = [];
-  int userId = 0;
 
   @override
   void initState() {
@@ -42,6 +41,8 @@ class _HomePageState extends State<HomePage> {
     loadItemsFromAPI();
   }
 
+int userId = 0;
+
   Future<void> loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String jsonData =
@@ -49,12 +50,10 @@ class _HomePageState extends State<HomePage> {
     final data = json.decode(jsonData);
     setState(() {
       username = prefs.getString('userName') ?? data['usuario']['nombre'];
-      userId = prefs.getInt('userId') ?? userId;
-      userImageUrl =
-          prefs.getString('userImageUrl') ?? data['usuario']['fotoPerfil'];
+      userImageUrl = data['usuario']['fotoPerfil'];
+      userId = prefs.getInt('userId') ?? userId; // Agregar la variable userId
       categorias = List<Map<String, dynamic>>.from(data['categorias']);
       preferencias = List<Map<String, dynamic>>.from(data['preferencias']);
-      
     });
   }
 
@@ -111,9 +110,13 @@ class _HomePageState extends State<HomePage> {
   List<Widget> buildSelectedItemsList() {
     return selectedItems.map((item) {
       return ListTile(
-        title: Text(item.name),
-        subtitle: Text("\$${item.price}"),
-        trailing: Text("Unidades: ${item.quantity}"),
+        title: Text(item.name, style: TextStyle(fontSize: 22)),
+        subtitle: Text(
+          "\$${item.price}",
+          style: TextStyle(fontSize: 22),
+        ),
+        trailing:
+            Text("Unidades: ${item.quantity}", style: TextStyle(fontSize: 22)),
       );
     }).toList();
   }
@@ -128,13 +131,77 @@ class _HomePageState extends State<HomePage> {
     return totalAmount.toStringAsFixed(2);
   }
 
+Future<void> comprarItems(List<Item> items) async {
+  // Crear la fecha actual
+  DateTime now = DateTime.now();
+  String fecha = now.toString();
+
+  // Crear la lista de órdenes de compra
+  List<Map<String, dynamic>> ordenesCompra = [];
+
+  for (Item item in items) {
+    Map<String, dynamic> ordenCompra = {
+      'id_user': userId,
+      'id_item': item.id,
+      'fecha': fecha,
+      'valor': item.price * item.quantity,
+    };
+    ordenesCompra.add(ordenCompra);
+  }
+
+  final response = await http.post(
+    Uri.parse('http://10.0.2.2:8000/ordenes'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode(ordenesCompra),
+  );
+
+  if (response.statusCode == 200) {
+        // Utilizar un nuevo Navigator para mostrar el AlertDialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return WillPopScope(
+              onWillPop: () async => false, // Evitar que se cierre al presionar "Atrás"
+              child: AlertDialog(
+                title: Text('Compra exitosa'),
+                content: Text('La compra se realizó exitosamente.'),
+                actions: [
+                  TextButton(
+                    child: Text('Aceptar'),
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Cerrar el AlertDialog
+                      loadItemsFromAPI(); // Recargar la página
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      } else {
+        // Hubo un error al crear las órdenes de compra
+        print('Error al crear las órdenes de compra');
+      }
+    // Las órdenes de compra se crearon exitosamente
+    print('Órdenes de compra creadas');
+    selectedItems.clear();
+}
+
   void showPaymentOptions() {
     int selectedOptionId = 0; // ID de la opción seleccionada
 
     // Lista de opciones de métodos de pago
     List<Map<String, dynamic>> paymentOptions = [
-      {'id': 1, 'title': 'Tarjeta de crédito'},
-      {'id': 2, 'title': 'PayPal'},
+      {
+        'id': 1,
+        'title': 'Tarjeta de crédito',
+        'image': 'assets/images/tarjeta_credito.png', // Ruta de la imagen para la opción de tarjeta de crédito
+      },
+      {
+        'id': 2,
+        'title': 'PayPal',
+        'image': 'assets/images/paypal.png', // Ruta de la imagen para la opción de PayPal
+      },
     ];
 
     showDialog(
@@ -147,15 +214,26 @@ class _HomePageState extends State<HomePage> {
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: paymentOptions.map((option) {
-                  return RadioListTile(
-                    title: Text(option['title']),
-                    value: option['id'],
-                    groupValue: selectedOptionId,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedOptionId = value;
-                      });
-                    },
+                  return Column(
+                    children: [
+                      Image.asset(
+                        option['image'],
+                        height: 50,
+                      ),
+                      RadioListTile(
+                        title: Text(
+                          option['title'],
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        value: option['id'],
+                        groupValue: selectedOptionId,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedOptionId = value;
+                          });
+                        },
+                      ),
+                    ],
                   );
                 }).toList(),
               );
@@ -164,8 +242,8 @@ class _HomePageState extends State<HomePage> {
           actions: [
             ElevatedButton(
               onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop(); // Cerrar el diálogo
                 createOrder();
-                Navigator.of(context).pop(); // Cerrar el diálogo
               },
               child: Text("Realizar compra"),
             ),
@@ -205,7 +283,6 @@ class _HomePageState extends State<HomePage> {
           .clear(); // Limpiar la lista de ítems seleccionados después de la compra
     } else {
       // Hubo un error al crear las órdenes de compra
-      print(ordenesCompra);
       print('Error al crear las órdenes de compra');
     }
   }
@@ -237,7 +314,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           SizedBox(height: 16),
           Container(
-            height: 100, // Tamaño vertical para categorías
+            height: 50, // Tamaño vertical para categorías
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -248,7 +325,13 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () {
                         // Acción al presionar el botón de categoría
                       },
-                      child: Text(categoria['title']),
+                      child: Text(
+                        categoria['title'],
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight
+                                .normal), // Tamaño de fuente ajustable
+                      ),
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius:
@@ -265,49 +348,54 @@ class _HomePageState extends State<HomePage> {
           ),
           SizedBox(height: 16),
           Container(
-            height: 200, // Tamaño vertical para preferencias
+            height: 250,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: preferencias.map((preferencia) {
                   return Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Container(
-                      width: 120, // Tamaño fijo para cada ítem de preferencia
-                      decoration: BoxDecoration(
-                        color: Colors.orange, // Color de fondo predeterminado
-                        borderRadius:
-                            BorderRadius.circular(20), // Bordes redondeados
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey, // Color de la sombra
-                            offset: Offset(0, 2), // Desplazamiento de la sombra
-                            blurRadius: 4, // Radio del desenfoque de la sombra
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(20), // Bordes redondeados
-                            child: Image.network(
-                              preferencia['image'],
-                              height: 165,
-                              fit: BoxFit.cover,
+                    child: Flexible(
+                      child: Container(
+                        width: 180,
+                        height:
+                            220, // Ajusta la altura del contenedor según sea necesario
+                        decoration: BoxDecoration(
+                          color: Colors.orange,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey,
+                              offset: Offset(0, 2),
+                              blurRadius: 4,
                             ),
-                          ),
-                          Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Padding(
-                              padding: EdgeInsets.all(8),
-                              child: Text(
-                                preferencia['title'],
-                                textAlign: TextAlign.center,
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.network(
+                                preferencia['image'],
+                                height: 165,
+                                fit: BoxFit.cover,
                               ),
                             ),
-                          ),
-                        ],
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: Padding(
+                                padding: EdgeInsets.all(8),
+                                child: Text(
+                                  preferencia['title'],
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize:
+                                          20), // Aumenta el tamaño de fuente según sea necesario
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -341,13 +429,13 @@ class _HomePageState extends State<HomePage> {
                       child: Text(
                         item.name,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 18),
+                        style: TextStyle(fontSize: 22),
                       ),
                     ),
                     subtitle: Expanded(
                       child: Text(
                         "\$${item.price}",
-                        style: TextStyle(fontSize: 18),
+                        style: TextStyle(fontSize: 22),
                       ),
                     ),
                     trailing: Row(
@@ -357,19 +445,23 @@ class _HomePageState extends State<HomePage> {
                           icon: Icon(Icons.remove),
                           onPressed: () => decrementQuantity(index),
                         ),
-                        Text(item.quantity.toString()),
+                        Text(
+                          item.quantity.toString(),
+                          style: TextStyle(fontSize: 22),
+                        ),
                         IconButton(
                           icon: Icon(Icons.add),
                           onPressed: () => incrementQuantity(index),
                         ),
                         Container(
-                          width: 100,
+                          width: 120,
+                          height: 60,
                           child: TextButton(
                             onPressed: () => toggleSelection(index),
                             child: Text(
                               item.isSelected ? "Quitar" : "Agregar",
                               style: TextStyle(
-                                fontSize: 18, // Tamaño del texto de los botones
+                                fontSize: 20, // Tamaño del texto de los botones
                                 color: Colors.white,
                               ),
                             ),
@@ -426,7 +518,10 @@ class _HomePageState extends State<HomePage> {
                           SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: () => showPaymentOptions(),
-                            child: Text("Comprar"),
+                            child: Text(
+                              "Comprar",
+                              style: TextStyle(fontSize: 24),
+                            ),
                           ),
                         ],
                       ),

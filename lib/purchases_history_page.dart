@@ -1,24 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class PurchasesHistoryPage extends StatelessWidget {
-  final List<Map<String, String>> purchases = [
-    {
-      'id': '001',
-      'amount': '10,000 CLP',
-      'date': '10/06/2023',
-    },
-    {
-      'id': '002',
-      'amount': '15,000 CLP',
-      'date': '12/06/2023',
-    },
-    {
-      'id': '003',
-      'amount': '20,000 CLP',
-      'date': '15/06/2023',
-    },
-  ];
+class PurchasesHistoryPage extends StatefulWidget {
+  @override
+  _PurchasesHistoryPageState createState() => _PurchasesHistoryPageState();
+}
+
+class _PurchasesHistoryPageState extends State<PurchasesHistoryPage> {
+  List<Map<String, dynamic>> purchases = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadPurchases();
+  }
+
+  Future<void> loadPurchases() async {
+    // Obtiene el ID de usuario del almacenamiento local
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('userId') ?? '';
+
+    // Realiza la solicitud al API para obtener las compras del usuario
+    final response = await http.get(Uri.parse('http://10.0.2.2:8000/purchases?user_id=$userId'));
+
+    if (response.statusCode == 200) {
+      final dynamic jsonResponse = json.decode(response.body);
+
+      if (jsonResponse is List) {
+        setState(() {
+          purchases = jsonResponse.map((purchase) => {
+            'id': purchase['id'].toString(),
+            'amount': purchase['amount'].toString(),
+            'date': purchase['date'].toString(),
+          }).toList();
+        });
+      } else {
+        print('Invalid response format: $jsonResponse');
+      }
+    } else {
+      print('Error en la solicitud GET: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
+  }
 
   Future<void> showNotification(String purchaseId, String amount, String date) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'profile_page.dart';
 import 'purchases_history_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'login_page.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -19,10 +21,25 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     String jsonData = await rootBundle.loadString('assets/data.json');
     setState(() {
       userData = json.decode(jsonData);
+      userData!['usuario']['nombre'] =
+          prefs.getString('userName') ?? userData!['usuario']['nombre'];
+      userData!['usuario']['fotoPerfil'] =
+          prefs.getString('userImageUrl') ?? userData!['usuario']['fotoPerfil'];
     });
+  }
+
+  void logout() async {
+    // Borra la información de la sesión en el almacenamiento local
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
+
+    // Navega a la página de inicio de sesión
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (_) => LoginPage()));
   }
 
   void navigateToPage(String pageName) {
@@ -127,7 +144,8 @@ class _SettingsPageState extends State<SettingsPage> {
                         children: <Widget>[
                           CircleAvatar(
                             radius: 50,
-                            backgroundImage: NetworkImage(userData!['usuario']['fotoPerfil']),
+                            backgroundImage: NetworkImage(
+                                userData!['usuario']['fotoPerfil']),
                           ),
                           SizedBox(height: 20),
                           Text(
@@ -153,9 +171,10 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                           SizedBox(height: 10),
                           buildButtonWithIcon(
-                            'Otra página',
-                            Icons.arrow_forward,
-                            () => navigateToPage('AnotherPage'),
+                            'Cerrar sesión',
+                            Icons.logout,
+                            () =>
+                                logout(), // Utiliza la función logout para cerrar la sesión
                           ),
                         ],
                       )
@@ -168,17 +187,3 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

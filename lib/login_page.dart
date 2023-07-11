@@ -90,11 +90,15 @@ class _LoginPageState extends State<LoginPage> {
       // Accede a los datos del usuario y utilízalos según tus necesidades
       int userId = userData['id'];
       String userName = userData['name'];
+      int userType = userData['type_user'];
+      String userMail = userData['email'];
 
       // Guarda los datos del usuario en el almacenamiento local
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setInt('userId', userId);
       await prefs.setString('userName', userName);
+      await prefs.setInt('userType', userType);
+      await prefs.setString('userMail', userMail);
       await prefs.setBool('isLoggedIn', true);
 
       // Navega a la siguiente página
@@ -106,7 +110,8 @@ class _LoginPageState extends State<LoginPage> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Error de inicio de sesión'),
-            content: Text('El inicio de sesión falló. Verifica tus credenciales e intenta nuevamente.'),
+            content: Text(
+                'El inicio de sesión falló. Verifica tus credenciales e intenta nuevamente.'),
             actions: [
               TextButton(
                 child: Text('Cerrar'),
