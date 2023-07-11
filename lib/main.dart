@@ -41,11 +41,11 @@ class MyApp extends StatelessWidget {
           int userType =
               snapshot.data!['userType']!; // Asegurar que el valor no sea null
 
-          Widget homeWidget = isLoggedIn ? HomeAdmin() : LoginPage();
+          Widget homeWidget = isLoggedIn ? HomeAdminpage() : LoginPage();
           if (userType == 1) {
             homeWidget = isLoggedIn ? HomePage() : LoginPage();
           } else if (userType == 2) {
-            homeWidget = isLoggedIn ? HomeAdmin() : LoginPage();
+            homeWidget = isLoggedIn ? HomeAdminpage() : LoginPage();
           }
 
           return MaterialApp(
@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
                 case '/settings':
                   return MaterialPageRoute(builder: (_) => SettingsPage());
                 case '/purchases':
-                  return MaterialPageRoute(builder: (_) => HomeAdmin());
+                  return MaterialPageRoute(builder: (_) => HomeAdminpage());
                 case '/purchases_history':
                   return MaterialPageRoute(
                       builder: (_) => PurchasesHistoryPage());

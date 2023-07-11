@@ -190,4 +190,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+  
+  NetworkImage(param0) {}
 }
+

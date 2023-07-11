@@ -142,11 +142,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          CircleAvatar(
+                          /*CircleAvatar(
                             radius: 50,
                             backgroundImage: NetworkImage(
                                 userData!['usuario']['fotoPerfil']),
-                          ),
+                          ),*/
                           SizedBox(height: 20),
                           Text(
                             userData!['usuario']['nombre'],
@@ -186,4 +186,6 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
+  
 }
+

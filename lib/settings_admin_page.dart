@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'settings_page.dart';
+import 'login_page.dart';
 
 class SettingsAdminPage extends StatelessWidget {
   @override
@@ -8,7 +10,23 @@ class SettingsAdminPage extends StatelessWidget {
         title: Text('Ajustes de Administrador'),
       ),
       body: Center(
-        child: Text('Página de Ajustes de Administrador'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Página de Ajustes de Administrador'),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                // Lógica para cerrar sesión
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => LoginPage()),
+                );
+              },
+              child: Text('Cerrar sesión'),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:haf/purchases_history_page.dart';
+import 'package:haf/purchases_history_admin_page.dart';
 import 'package:haf/products_management_page.dart';
 import 'package:haf/settings_admin_page.dart';
 
-class HomeAdmin extends StatelessWidget {
+class HomeAdminpage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +21,7 @@ class HomeAdmin extends StatelessWidget {
             ),
             SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => _navigateToPage(context, PurchasesHistoryPage()),
+              onPressed: () => _navigateToPage(context, PurchasesHistoryAdminPage()),
               child: Text('Historial de Pedidos'),
             ),
             SizedBox(height: 16),

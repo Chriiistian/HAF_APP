@@ -298,9 +298,9 @@ class _HomePageState extends State<HomePage> {
                   MaterialPageRoute(builder: (_) => SettingsPage()),
                 );
               },
-              child: CircleAvatar(
+              /*child: CircleAvatar(
                 backgroundImage: NetworkImage(userImageUrl),
-              ),
+              ),*/
             ),
           ],
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -530,4 +530,6 @@ class _HomePageState extends State<HomePage> {
           : null,
     );
   }
+  
+  
 }
